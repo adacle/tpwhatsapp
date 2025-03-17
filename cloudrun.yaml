@@ -1,0 +1,51 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/urls: '["https://gpt-api-546387814767.us-central1.run.app","https://gpt-api-g4pdpkc3jq-uc.a.run.app"]'
+  labels:
+    cloud.googleapis.com/location: us-central1
+  name: whatsapp
+  namespace: '546387814767'
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '2'
+        run.googleapis.com/client-name: cloud-console
+        run.googleapis.com/cloudsql-instances: keywordio-gcp-v2:us-central1:adhelp-db-v1
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 385.0.0
+        run.googleapis.com/cloudsql-instances: keywordio-gcp-v2:us-central1:adhelp-db-v1
+        run.googleapis.com/cpu-throttling: 'false'
+        run.googleapis.com/network-interfaces: '[{"network":"default","subnetwork":"default","tags":["adhelpbackend"]}]'
+        run.googleapis.com/startup-cpu-boost: 'true'
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+      labels:
+        client.knative.dev/nonce: 5d1ee2cd-35af-447d-a637-5bafa6c377e6
+        run.googleapis.com/startupProbeType: Default
+    spec:
+      containerConcurrency: 80
+      containers:
+      - image: us-central1-docker.pkg.dev/keywordio-gcp-v2/gpt-api/nordicknots@sha256:aebc8ee917d1d0cc41865c80e3b649b457d4798b47b56b0a3929580eeb88d392
+        name: nordicknots-1
+        ports:
+        - containerPort: 8080
+          name: http1
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 4Gi
+        startupProbe:
+          failureThreshold: 1
+          periodSeconds: 240
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 240
+      serviceAccountName: 546387814767-compute@developer.gserviceaccount.com
+      timeoutSeconds: 1800
+  traffic:
+  - latestRevision: true
+    percent: 100

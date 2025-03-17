@@ -1,0 +1,53 @@
+export GOOGLE_APPLICATION_CREDENTIALS="/Users/ashish/kw.json"
+
+gunicorn -w 4 -b 0.0.0.0:8000 app:app
+
+gcloud artifacts repositories create whatsapp \
+    --repository-format=docker \
+    --location=us-central1 \
+    --description="Docker repo for whatsapp testing"
+
+
+docker buildx build  --platform linux/amd64 -t us-central1-docker.pkg.dev/keywordio-gcp-v2/whatsapp/whatsapp:11.3.1 -f Dockerfile .
+
+curl -X POST "https://your-domain.com/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d" \
+     -H "X-Twilio-Signature: INVALID_SIGNATURE" \
+     -d "From=whatsapp:+919876543210" \
+     -d "Body=Hello bot!"
+
+
+curl -X POST 'https://9096-219-91-158-22.ngrok-free.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d' \
+     -H "X-Twilio-Signature: INVALID_SIGNATURE" \
+     -d "From=whatsapp:+919876543210" \
+     -d "Body=Hello bot!"
+
+
+git remote set-url origin https://github.com/ashishpathak30/tpwhatsapp.git
+
+docker run \
+  -e DJANGO_ENV=docker \
+  -e GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json" \
+  --platform linux/amd64 \
+  -p 8080:8080 \
+  -e SKIP_TWILIO_VALIDATION=true \
+  -v /Users/ashish/kw.json:/app/credentials.json \
+  us-central1-docker.pkg.dev/keywordio-gcp-v2/whatsapp/whatsapp:11.3.1
+
+docker push us-central1-docker.pkg.dev/keywordio-gcp-v2/whatsapp/whatsapp:11.3.1
+
+gcloud run deploy whatsapp \
+  --region us-central1 \
+  --image us-central1-docker.pkg.dev/keywordio-gcp-v2/whatsapp/whatsapp:11.3.1 \
+  --memory 4Gi \
+  --cpu 1 \
+  --max-instances 2 \
+  --min-instances 0 \
+  --concurrency 80 \
+  --timeout 1800s \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=keywordio-gcp-v2,TWILIO_WEBHOOK_URL=https://whatsapp-546387814767.us-central1.run.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d \
+  --ingress all \
+  --allow-unauthenticated
+
+docker run --platform linux/amd64 -it -d -p 8080:8080 --name whatsapp us-central1-docker.pkg.dev/keywordio-gcp-v2/whatsapp/whatsapp:11.3.1
+
+WEBHOOK : https://whatsapp-546387814767.us-central1.run.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d
