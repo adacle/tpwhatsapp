@@ -1,14 +1,14 @@
 FROM python:3.10.7-slim-buster
 
 # Set the working directory
-WORKDIR /whatsapp
+WORKDIR /whatsapptp
 
 # Copy the requirements file
 COPY requirements.txt .
 
 # Install necessary dependencies
 RUN apt-get update && \
-    apt-get -y install tree sudo nano vim git libpq-dev python3-dev gcc && \
+    apt-get -y install tree sudo nano vim git libpq-dev python3-dev gcc ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
