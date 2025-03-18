@@ -117,3 +117,4 @@ six==1.16.0
 
 
 google-cloud-speech==2.29.0
+mutagen

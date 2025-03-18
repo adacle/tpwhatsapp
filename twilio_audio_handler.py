@@ -6,6 +6,8 @@ import tempfile
 import time
 from pydub import AudioSegment
 from google.cloud import speech
+import mutagen
+from mutagen.mp3 import MP3
 import os
 from twilio.rest import Client
 from config import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, AUTHORIZED_WHATSAPP_NUMBER
@@ -59,11 +61,20 @@ def convert_ogg_to_mp3(ogg_path):
     except Exception as e:
         raise Exception(f"FFmpeg error: {str(e)} - Ensure FFmpeg is installed.")
 
+
 def transcribe_audio(mp3_path):
-    """Transcribe the MP3 audio file."""
+    """Transcribe the MP3 audio file with a 30-second limit."""
     try:
+        # Check audio duration using mutagen
+        audio_info = MP3(mp3_path)
+        duration = audio_info.info.length  # Get duration in seconds
+
+        if duration > 30:
+            raise ValueError(f"Audio is too long ({duration:.2f}s). Maximum allowed length is 30 seconds.")
+
         with open(mp3_path, "rb") as audio_file:
             audio_content = audio_file.read()
+
         config = speech.RecognitionConfig(
             encoding=speech.RecognitionConfig.AudioEncoding.MP3,
             sample_rate_hertz=16000,
@@ -71,9 +82,13 @@ def transcribe_audio(mp3_path):
         )
         audio = speech.RecognitionAudio(content=audio_content)
         response = speech_client.recognize(config=config, audio=audio)
+
         transcript = " ".join([result.alternatives[0].transcript for result in response.results])
         logger.info(f"Transcription result: {transcript}")
         return transcript
+
+    except mutagen.MutagenError:
+        raise Exception("Error reading audio file. Please ensure it's a valid MP3.")
     except Exception as e:
         raise Exception(f"Error in transcription: {str(e)}")
 
