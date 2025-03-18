@@ -1,4 +1,4 @@
-docker buildx build  --platform linux/amd64 -t asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.2 .
+docker buildx build  --platform linux/amd64 -t asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.3 .
 
 docker run --platform linux/amd64 \
     -e DJANGO_ENV=docker \
@@ -6,16 +6,16 @@ docker run --platform linux/amd64 \
     -e GOOGLE_APPLICATION_CREDENTIALS="/app/whatsapptp.json" \
     -v /Users/ashish/whatsapptp.json:/app/whatsapptp.json \
     -p 8080:8080 \
-    asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.2
+    asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.3
 
 IMP : ngrok webhook url is important in above command when running on local docker container    
 
-docker push asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.2
+docker push asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.3
 
 
 gcloud run deploy cloudrunwhatsapptp \
   --region asia-south1 \
-  --image asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.2 \
+  --image asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.3 \
   --memory 4Gi \
   --cpu 1 \
   --max-instances 2 \
