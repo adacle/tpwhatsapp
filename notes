@@ -1,42 +1,45 @@
-docker buildx build  --platform linux/amd64 -t asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp:17.3.1 .
+docker buildx build  --platform linux/amd64 -t asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.2 .
 
 docker run --platform linux/amd64 \
     -e DJANGO_ENV=docker \
+    -e WEBHOOK_URL="https://9e15-219-91-158-22.ngrok-free.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d" \
     -e GOOGLE_APPLICATION_CREDENTIALS="/app/whatsapptp.json" \
     -v /Users/ashish/whatsapptp.json:/app/whatsapptp.json \
-    -e SKIP_TWILIO_VALIDATION=true \
     -p 8080:8080 \
-    asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp:17.3.1
+    asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.1
 
-docker push us-central1-docker.pkg.dev/marathi-415211/mrhn/tp:17.3.1
+IMP : ngrok webhook url is important in above command when running on local docker container    
 
-
-docker push asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp:17.3.1
-
-gcloud auth activate-service-account --key-file=/Users/ashish/whatsapptp.json
-
-gcloud projects add-iam-policy-binding whatsapptp \
-    --member="serviceAccount:service-accocunt-whatsapptp@whatsapptp.iam.gserviceaccount.com" \
-    --role="roles/artifactregistry.writer"
+docker push asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.1
 
 
-gcloud run services update tp --image us-central1-docker.pkg.dev/marathi-415211/mrhn/tp:17.3.1 --region us-central1
+gcloud run deploy cloudrunwhatsapptp \
+  --region asia-south1 \
+  --image asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.1 \
+  --memory 4Gi \
+  --cpu 1 \
+  --max-instances 2 \
+  --min-instances 0 \
+  --concurrency 80 \
+  --timeout 1800s \
+  --set-env-vars TWILIO_WEBHOOK_URL=https://cloudrunwhatsapptp-551656832602.asia-south1.run.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d \
+  --ingress all \
+  --allow-unauthenticated
+
+gcloud run services describe cloudrunwhatsapptp \
+  --region asia-south1 \
+  --format=json > cloudrun-config.json
 
 
-gcloud services enable secretmanager.googleapis.com --project=whatsapptp
-gcloud services enable speech.googleapis.com --project=whatsapptp
+cloudrun service account : 551656832602-compute@developer.gserviceaccount.com
 
-
-gcloud artifacts repositories create arwhatsapptp \
-    --repository-format=docker \
-    --location=asia-south1 \
-    --description="My Docker image repository in Mumbai, India"
 
 gcloud secrets add-iam-policy-binding whatsapp-app-credentials \
-    --member="serviceAccount:service-accocunt-whatsapptp@whatsapptp.iam.gserviceaccount.com" \
-    --role="roles/secretmanager.secretAccessor" \
-    --project=whatsapptp
+  --member="serviceAccount:551656832602-compute@developer.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
 
+
+docker tag asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp:18.3.1 asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.1
 
 echo "asia-south1-docker.pkg.dev/$(gcloud config get-value project)/arwhatsapptp"
 
@@ -45,9 +48,9 @@ asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp
 
 
 
-gcloud artifacts repositories create whatsapptp \
+gcloud artifacts repositories create whatsapp-tp \
     --repository-format=docker \
-    --location=LOCATION \
+    --location=us-central1 \
     --description="Repository for storing Docker images"
 
 whatsapptp
@@ -67,73 +70,3 @@ gcloud auth login
 gcloud config list account
 gcloud config set project marathi-415211
 
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/ashish/mr.json"
-export GOOGLE_APPLICATION_CREDENTIALS="/Users/ashish/kw.json"
-
-gcloud secrets create developer-service-account-key   --data-file=/Users/ashish/developer-service-account-key.json
-
-docker commit 14ba2560ecd6b3c10ca6c6094b38221052d5b5e56a5709a98c9042a4ee9f7dcf gcr.io/keywordio-gcp-v2/nelly-gtm-api:6
-
-gcloud secrets create DJANGO_SECRET_KEY \
-    --data-file=django_secret_key.txt \
-    --replication-policy="automatic"
-
-gcloud secrets list
-
-gcloud projects add-iam-policy-binding marathi-415211 \
-  --member="serviceAccount:115539617414-compute@developer.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor"
-
-
-docker run --platform linux/amd64 \
-    -e DJANGO_ENV=docker \
-    -e GOOGLE_APPLICATION_CREDENTIALS="/app/mr.json" \
-    -v /Users/ashish/mr.json:/app/mr.json \
-    -p 8080:8080 \
-    us-central1-docker.pkg.dev/marathi-415211/mrhn/tp:17.3.1
-
-
-
-gcloud run deploy mr \
-  --image gcr.io/marathi-415211/mr:0.1 \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --update-env-vars DJANGO_ENV=docker \
-  --set-secrets GOOGLE_APPLICATION_CREDENTIALS=developer-service-account-key:/app/credentials.json \
-  --service-account 115539617414-compute@developer.gserviceaccount.com
-
-
-gcloud iam service-accounts list
-DISPLAY NAME                        EMAIL                                               DISABLED
-App Engine default service account  marathi-415211@appspot.gserviceaccount.com          False
-Default compute service account     115539617414-compute@developer.gserviceaccount.com  False
-
-
-projects/115539617414/secrets/developer-service-account-key
-
-
-gcloud run deploy mr \
-  --image gcr.io/marathi-415211/mr:0.1 \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --update-env-vars DJANGO_ENV=docker \
-  --update-secrets GOOGLE_APPLICATION_CREDENTIALS=projects/115539617414/secrets/developer-service-account-key:latest \
-  --service-account 115539617414-compute@developer.gserviceaccount.com
-
-
-gcloud run deploy <SERVICE_NAME> \
-  --image=<IMAGE_URL> \
-  --platform=managed \
-  --region=<REGION> \
-  --update-secrets GOOGLE_APPLICATION_CREDENTIALS=<SECRET_NAME>:latest \
-  --allow-unauthenticated
-
-
-gcloud run services describe mr --region=us-central1 --format="json" | grep GOOGLE_APPLICATION_CREDENTIALS
-
-Logs : https://storage.cloud.google.com/marathi_ai_log/daily_transcription_log_20250103.txt
-
-Secret Manager : https://console.cloud.google.com/security/secret-manager?referrer=search&invt=Abl2tQ&project=marathi-415211
-
-
-Github : https://github.com/adacle/bknewmrai

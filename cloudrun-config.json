@@ -1,0 +1,118 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Service",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "509.0.0",
+      "run.googleapis.com/ingress": "all",
+      "run.googleapis.com/ingress-status": "all",
+      "run.googleapis.com/operation-id": "2950969c-a255-4903-8219-3aa76b29cd11",
+      "run.googleapis.com/urls": "[\"https://cloudrunwhatsapptp-551656832602.asia-south1.run.app\",\"https://cloudrunwhatsapptp-7w5vwl7gka-el.a.run.app\"]",
+      "serving.knative.dev/creator": "adaclesolutions@gmail.com",
+      "serving.knative.dev/lastModifier": "adaclesolutions@gmail.com"
+    },
+    "creationTimestamp": "2025-03-18T06:49:11.402466Z",
+    "generation": 5,
+    "labels": {
+      "cloud.googleapis.com/location": "asia-south1",
+      "run.googleapis.com/satisfiesPzs": "true"
+    },
+    "name": "cloudrunwhatsapptp",
+    "namespace": "551656832602",
+    "resourceVersion": "AAYwmHvJJKc",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/551656832602/services/cloudrunwhatsapptp",
+    "uid": "8d5b3bf4-d6b5-49de-b0bd-2aa51775e903"
+  },
+  "spec": {
+    "template": {
+      "metadata": {
+        "annotations": {
+          "autoscaling.knative.dev/maxScale": "2",
+          "run.googleapis.com/client-name": "gcloud",
+          "run.googleapis.com/client-version": "509.0.0",
+          "run.googleapis.com/startup-cpu-boost": "true"
+        },
+        "labels": {
+          "client.knative.dev/nonce": "zfpuedwjgn",
+          "run.googleapis.com/startupProbeType": "Default"
+        }
+      },
+      "spec": {
+        "containerConcurrency": 80,
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "TWILIO_WEBHOOK_URL",
+                "value": "https://cloudrunwhatsapptp-551656832602.asia-south1.run.app/twilio/webhook/5a9d9a90702d98dd2c7b8693dab22a3d"
+              }
+            ],
+            "image": "asia-south1-docker.pkg.dev/whatsapptp/arwhatsapptp/wttp:18.3.1",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http1"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "4Gi"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 1,
+              "periodSeconds": 240,
+              "tcpSocket": {
+                "port": 8080
+              },
+              "timeoutSeconds": 240
+            }
+          }
+        ],
+        "serviceAccountName": "551656832602-compute@developer.gserviceaccount.com",
+        "timeoutSeconds": 1800
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100
+      }
+    ]
+  },
+  "status": {
+    "address": {
+      "url": "https://cloudrunwhatsapptp-7w5vwl7gka-el.a.run.app"
+    },
+    "conditions": [
+      {
+        "lastTransitionTime": "2025-03-18T07:02:10.205863Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2025-03-18T07:02:08.965823Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2025-03-18T07:02:10.171823Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "latestCreatedRevisionName": "cloudrunwhatsapptp-00005-jwn",
+    "latestReadyRevisionName": "cloudrunwhatsapptp-00005-jwn",
+    "observedGeneration": 5,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "cloudrunwhatsapptp-00005-jwn"
+      }
+    ],
+    "url": "https://cloudrunwhatsapptp-7w5vwl7gka-el.a.run.app"
+  }
+}
